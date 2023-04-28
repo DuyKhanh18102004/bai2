@@ -1,0 +1,640 @@
+#pragma warning(disable:4996)
+#include<stdio.h>
+#include<conio.h>
+#include<string.h>
+#include<stdlib.h>
+
+struct Date
+{
+	int ngay;
+	int thang;
+	int nam;
+};
+
+
+struct Khachhang
+{
+	char maKH[100];
+	char tenKH[100];
+	int tuoi;
+	char gioiTinh[10];
+	char Sdt[15];
+};
+
+struct Hanghoa
+{
+	//char maSP[50];
+	char tenSP[50];
+	int soLuong;  //Khi tạo hàm nhớ phải có sự chỉnh sửa số lượng (vd: khi nhập 20 có khách hành mua 10 thì sl bây h là 10)
+	double giaBan;  //Giá bán mỗi sản phẩm
+};
+
+typedef struct ChitietHoadon
+{
+	char maHoadon[50];
+	Hanghoa sanpham;
+	int soluong_mua;
+	double tien; //tien = soluong_mua * giaBan(1sp)
+	struct ChitietHoadon*next;
+};
+
+//CHÚ Ý ĐÂY LÀ ĐOẠN GIẢI THÍCH CHO PHẦN TÍNH TIỀN CỦA CHI TIẾT HOÁ ĐƠN
+// // Tạo một sản phẩm mới
+// Hanghoa newHH;
+// strcpy(newHH.tenSP, "Sản phẩm A");
+// newHH.soLuong = 100;
+// newHH.giaBan = 5000;
+
+// // Thêm sản phẩm mới vào danh sách sản phẩm
+// HH_Node *hh_node = new HH_Node;
+// hh_node->data = newHH;
+// hh_node->next = NULL;
+
+// if (hh_list.head == NULL) {
+//     hh_list.head = hh_list.tail = hh_node;
+// }
+// else {
+//     hh_list.tail->next = hh_node;
+//     hh_list.tail = hh_node;
+// }
+
+// // Tạo chi tiết hóa đơn
+// ChitietHoadon newCTHD;
+// strcpy(newCTHD.maHoadon, "HD001");
+// newCTHD.soluong_mua = 10;
+
+// Tính tiền cho chi tiết hóa đơn
+// void tinhTien(ChitietHoadon *cthd, HH_List ds_hh) {
+//     // Duyệt danh sách hàng hóa để tìm sản phẩm tương ứng với chi tiết hóa đơn
+//     HH_Node *node = ds_hh.head;
+//     while (node != NULL) {
+//         if (strcmp(node->data.tenSP, cthd->sanpham.tenSP) == 0) {
+//             // Tìm được sản phẩm tương ứng, tính tiền cho chi tiết hóa đơn
+//             cthd->tien = cthd->soluong_mua * node->data.giaBan;
+//             break;
+//         }
+//         node = node->next;
+//     }
+// }
+// newCTHD.tien = tinhTien(newCYHD, HH_List ds);
+
+
+struct Hoadon
+{
+	char maHoadon[50];
+	Khachhang khachhang;
+	Date ngay_nhap;   //Dua vao ngay_nhap de xac dinh doanh thu theo ngay
+	ChitietHoadon *CTHD; // Con trỏ trỏ đến danh sách các chi tiết hóa đơn
+	int soLuongCTHD; // Số lượng chi tiết hóa đơn
+	double tongTien;
+};
+
+struct KH_Node
+{
+	Khachhang data;
+	KH_Node *next;
+};
+
+struct HH_Node
+{
+	Hanghoa data;
+	HH_Node *next;
+};
+
+struct CTHD_Node
+{
+	ChitietHoadon data;
+	CTHD_Node *next;
+};
+
+struct HD_Node
+{
+	Hoadon data;
+	HD_Node *next;
+};
+
+struct KH_List
+{
+	KH_Node *head;
+	KH_Node *tail;
+};
+
+struct HH_List
+{
+	HH_Node *head;
+	HH_Node *tail;
+};
+
+struct CTHD_List
+{
+	CTHD_Node *head;
+	CTHD_Node *tail;
+};
+
+struct HD_List
+{
+	HD_Node *head;
+	HD_Node *tail;
+};
+
+
+void init_KH(KH_List &ds)
+{
+	ds.head = NULL;
+	ds.tail = NULL;
+}
+
+void init_HH(HH_List &ds)
+{
+	ds.head = NULL;
+	ds.tail = NULL;
+}
+
+void init_CTHD(CTHD_List &ds)
+{
+	ds.head = NULL;
+	ds.tail = NULL;
+}
+
+void init_HD(HD_List &ds)
+{
+	ds.head = NULL;
+	ds.tail = NULL;
+}
+
+KH_Node *create_KH_Node(Khachhang dulieu)
+{
+	KH_Node *p = new KH_Node;
+	if (p == NULL)
+	{
+		printf("\nKhong du bo nho cap phat!");
+		return NULL;
+	}
+
+	p->data = dulieu;
+	p->next = NULL;
+
+	return p;
+}
+
+HH_Node *create_HH_Node(Hanghoa dulieu)
+{
+	HH_Node *p = new HH_Node;
+	if (p == NULL)
+	{
+		printf("\nKhong du bo nho cap phat!");
+		return NULL;
+	}
+
+	p->data = dulieu;
+	p->next = NULL;
+
+	return p;
+}
+
+HD_Node *create_HD_Node(Hoadon dulieu)
+{
+	HD_Node *p = new HD_Node;
+	if (p == NULL)
+	{
+		printf("\nKhong du bo nho cap phat!");
+		return NULL;
+	}
+
+	p->data = dulieu;
+	p->next = NULL;
+
+	return p;
+}
+
+CTHD_Node *create_CTHD_Node(ChitietHoadon dulieu)
+{
+	CTHD_Node *p = new CTHD_Node;
+	if (p == NULL)
+	{
+		printf("\nKhong du bo nho cap phat!");
+		return NULL;
+	}
+
+	p->data = dulieu;
+	p->next = NULL;
+
+	return p;
+}
+
+void ghiFIle_Khachhang(KH_List ds)
+{
+	FILE *f = fopen("Khachhang.txt", "w");
+	if (f == NULL)
+	{
+		printf("\nKhong mo duoc file");
+		_getch();
+		return;
+	}
+
+	for (KH_Node *k = ds.head; k != NULL; k = k->next)
+	{
+		fprintf(f, "%-20s %-20s %-10d %-10s %-20s\n", k->data.maKH, k->data.tenKH, k->data.tuoi,
+			k->data.gioiTinh, k->data.Sdt);
+	}
+
+	fclose(f);
+}
+
+void docFile_Khachhang(KH_List &ds, int *slg_KH)
+{
+	FILE *f = fopen("Khachhang.txt", "r");
+	if (f == NULL)
+	{
+		printf("\nKhong the mo file");
+		_getch();
+		return;
+	}
+
+	int ktra;
+	Khachhang dulieu;
+	KH_Node *tmp = ds.head;
+
+	while ((ktra = fscanf(f, "%20s %20s %10d %10s %20s", dulieu.maKH, dulieu.tenKH,
+		&dulieu.tuoi, dulieu.gioiTinh, dulieu.Sdt)) == 5)
+	{
+		KH_Node *p = create_KH_Node(dulieu);
+		int find = 0;
+		while (tmp != NULL)
+		{
+			if (strcmp(tmp->data.Sdt, p->data.Sdt) == 0)
+			{
+				find = 1;
+				free(p);
+				break;
+			}
+			tmp = tmp->next;
+		}
+
+		tmp = ds.head;
+		if (find != 1)
+		{
+			if (ds.head == NULL)
+			{
+				ds.head = ds.tail = p;
+			}
+			else
+			{
+				ds.tail->next = p;
+				ds.tail = p;
+			}
+			(*slg_KH)++;
+		}
+	}
+	fclose(f);
+}
+
+void ghiFIle_Hanghoa(HH_List ds)
+{
+	FILE *f = fopen("Hanghoa.txt", "w");
+	if (f == NULL)
+	{
+		printf("\nKhong mo duoc file");
+		_getch();
+		return;
+	}
+
+	for (HH_Node *k = ds.head; k != NULL; k = k->next)
+	{
+		fprintf(f, "%-20s %-10d %-20f\n", k->data.tenSP, k->data.soLuong, k->data.giaBan);
+	}
+
+	fclose(f);
+}
+
+void docFile_Hanghoa(HH_List &ds, int *slg_HH)
+{
+	FILE *f = fopen("Hanghoa.txt", "r");
+	if (f == NULL)
+	{
+		printf("\nKhong the mo file");
+		_getch();
+		return;
+	}
+
+	int ktra;
+	Hanghoa dulieu;
+	HH_Node *tmp = ds.head;
+
+	while ((ktra = fscanf(f, "%20s %10d %20f", dulieu.tenSP, &dulieu.soLuong, &dulieu.giaBan)) == 3)
+	{
+		HH_Node *p = create_HH_Node(dulieu);
+		int find = 0;
+		while (tmp != NULL)
+		{
+			if (strcmp(tmp->data.tenSP, p->data.tenSP) == 0)
+			{
+				find = 1;
+				free(p);
+				break;
+			}
+			tmp = tmp->next;
+		}
+
+		tmp = ds.head;
+		if (find != 1)
+		{
+			if (ds.head == NULL)
+			{
+				ds.head = ds.tail = p;
+			}
+			else
+			{
+				ds.tail->next = p;
+				ds.tail = p;
+			}
+			(*slg_HH)++;
+		}
+	}
+	fclose(f);
+}
+
+
+void ghiFIle_Hoadon(HD_List ds)
+{
+	FILE *f = fopen("Hoadon.txt", "w");
+	if (f == NULL)
+	{
+		printf("\nKhong mo duoc file");
+		_getch();
+		return;
+	}
+
+	for (HD_Node *k = ds.head; k != NULL; k = k->next)
+	{
+		fprintf(f, "%-20s %-20s %d/%d/%-10d %-20s %-10d %20f\n", k->data.maHoadon,
+			k->data.khachhang, k->data.ngay_nhap.ngay, k->data.ngay_nhap.thang,
+			k->data.ngay_nhap.nam, k->data.CTHD->maHoadon, k->data.soLuongCTHD, k->data.tongTien);
+	}
+
+	fclose(f);
+}
+
+void docFile_Hoadon(HD_List &ds, int *slg_HD)
+{
+	FILE *f = fopen("Hoadon.txt", "r");
+	if (f == NULL)
+	{
+		printf("\nKhong the mo file");
+		_getch();
+		return;
+	}
+
+	int ktra;
+	Hoadon dulieu;
+	HD_Node *tmp = ds.head;
+
+	while ((ktra = fscanf(f, "%-20s %-20s %d/%d/%-10d %-10d %20f",
+		dulieu.maHoadon, dulieu.khachhang.tenKH, &dulieu.ngay_nhap.ngay,
+		&dulieu.ngay_nhap.thang, &dulieu.ngay_nhap.nam,
+		&dulieu.soLuongCTHD, &dulieu.tongTien)) == 7)
+	{
+		HD_Node *p = create_HD_Node(dulieu);
+		int find = 0;
+		while (tmp != NULL)
+		{
+			if (strcmp(tmp->data.maHoadon, p->data.maHoadon) == 0)
+			{
+				find = 1;
+				free(p);
+				break;
+			}
+			tmp = tmp->next;
+		}
+
+		tmp = ds.head;
+		if (find != 1)
+		{
+			if (ds.head == NULL)
+			{
+				ds.head = ds.tail = p;
+			}
+			else
+			{
+				ds.tail->next = p;
+				ds.tail = p;
+			}
+			(*slg_HD)++;
+		}
+	}
+	fclose(f);
+}
+
+
+void ghiFIle_ChitietHoadon(CTHD_List ds)
+{
+	FILE *f = fopen("ChitietHoadon.txt", "w");
+	if (f == NULL)
+	{
+		printf("\nKhong mo duoc file");
+		_getch();
+		return;
+	}
+
+	for (CTHD_Node *k = ds.head; k != NULL; k = k->next)
+	{
+		fprintf(f, "%-20s %-20s %-10d %-20f\n", k->data.maHoadon,
+			k->data.sanpham.tenSP, k->data.soluong_mua, k->data.tien);
+	}
+
+	fclose(f);
+}
+
+void docFile_ChitietHoadon(CTHD_List &ds, int *slg_CTHD)
+{
+	FILE *f = fopen("ChitietHoadon.txt", "r");
+	if (f == NULL)
+	{
+		printf("\nKhong the mo file");
+		_getch();
+		return;
+	}
+
+	int ktra;
+	ChitietHoadon dulieu;
+	CTHD_Node *tmp = ds.head;
+
+	while ((ktra = fscanf(f, "%-20s %-20s %-10d %-20f", dulieu.maHoadon,
+		dulieu.sanpham.tenSP, &dulieu.soluong_mua, &dulieu.tien)) == 4)
+	{
+		CTHD_Node *p = create_CTHD_Node(dulieu);
+		int find = 0;
+		while (tmp != NULL)
+		{
+			if (strcmp(tmp->data.maHoadon, p->data.maHoadon) == 0
+				&& strcmp(tmp->data.sanpham.tenSP, p->data.sanpham.tenSP) == 0)
+			{
+				find = 1;
+				free(p);
+				break;
+			}
+			tmp = tmp->next;
+		}
+
+		tmp = ds.head;
+		if (find != 1)
+		{
+			if (ds.head == NULL)
+			{
+				ds.head = ds.tail = p;
+			}
+			else
+			{
+				ds.tail->next = p;
+				ds.tail = p;
+			}
+			(*slg_CTHD)++;
+		}
+	}
+	fclose(f);
+}
+
+
+//double TongTien(CTHD_List ds_cthd, HH_List* ds_hh) {
+//	
+//	double tongTien = 0;
+//	CTHD_Node *node = ds_cthd.head;
+//	while (node != NULL) {
+//		// Kiểm tra danh sách hàng hóa truyền vào
+//		if (ds_hh == NULL) {
+//			printf("\nDanh sach hang hoa rong");
+//			return 0;
+//		}
+//		// Duyệt danh sách hàng hóa để tìm sản phẩm tương ứng với chi tiết hóa đơn
+//		HH_Node *hh_node = ds_hh->head;
+//		bool timThay = false;
+//		while (hh_node != NULL) {
+//			if (strcmp(hh_node->data.tenSP, node->data.sanpham.tenSP) == 0) {
+//				// Tìm được sản phẩm tương ứng, tính tiền cho chi tiết hóa đơn
+//				node->data.tien = node->data.soluong_mua * hh_node->data.giaBan;
+//				timThay = true;
+//				break;
+//			}
+//			hh_node = hh_node->next;
+//		}
+//		if (!timThay) {
+//			// Không tìm thấy sản phẩm tương ứng, gán giá trị mặc định cho tiền của chi tiết hóa đơn
+//			node->data.tien = 0;
+//		}
+//		// Cộng dồn tổng tiền của chi tiết hóa đơn vào tổng tiền của hóa đơn
+//		tongTien += node->data.tien;
+//		node = node->next;
+//	}
+//	return tongTien;
+//}
+
+
+//Hàm tính tổng tiền
+double TongTien(ChitietHoadon* ds_cthd, HH_List* ds_hh) {
+
+	double tongTien = 0;
+	ChitietHoadon* node = ds_cthd;
+	while (node != NULL) {
+		// Kiểm tra danh sách hàng hóa truyền vào
+		if (ds_hh == NULL) {
+			printf("\nDanh sach hang hoa rong");
+			return 0;
+		}
+		// Duyệt danh sách hàng hóa để tìm sản phẩm tương ứng với chi tiết hóa đơn
+		HH_Node* hh_node = ds_hh->head;
+		bool timThay = false;
+		while (hh_node != NULL) {
+			if (strcmp(hh_node->data.tenSP, node->sanpham.tenSP) == 0) {
+				// Tìm được sản phẩm tương ứng, tính tiền cho chi tiết hóa đơn
+				node->tien = node->soluong_mua * hh_node->data.giaBan;
+				timThay = true;
+				break;
+			}
+			hh_node = hh_node->next;
+		}
+		if (!timThay) {
+			// Không tìm thấy sản phẩm tương ứng, gán giá trị mặc định cho tiền của chi tiết hóa đơn
+			node->tien = 0;
+		}
+		// Cộng dồn tổng tiền của chi tiết hóa đơn vào tổng tiền của hóa đơn
+		tongTien += node->tien;
+		// Di chuyển đến nút tiếp theo bằng cách tìm nút tiếp theo từ danh sách
+		node = node->next;
+		
+	}
+	return tongTien;
+}
+// Hàm sắp xếp giảm dần theo tổng tiền
+void SXHD_GiamDanTheoTT(HD_List &ds_hd, HH_List* ds_hh)
+{
+	if (ds_hd.head == NULL || ds_hd.head->next == NULL)
+		return;
+
+	HD_Node*k = ds_hd.head;
+	for (k = ds_hd.head; k != NULL; k = k->next)
+	{
+		double tongTien = TongTien(k->data.CTHD, ds_hh);
+		k->data.tongTien = tongTien;
+	}
+
+	HD_Node *p;
+	HD_Node *nextNode;
+	int swapped;
+	do
+	{
+		swapped = 0;
+		p = ds_hd.head;
+		while (p != NULL)
+		{
+			nextNode = p->next;
+			if (nextNode != NULL && p->data.tongTien < nextNode->data.tongTien)
+			{
+				Hoadon temp = p->data;
+				p->data = nextNode->data;
+				nextNode->data = temp;
+				HD_Node *tempNode = p->next;
+				p->next = nextNode->next;
+				nextNode->next = tempNode;
+
+				swapped = 1;
+			}
+			else
+			{
+				p = p->next;
+			}
+		}
+	} while (swapped);
+}
+
+//Hàm sắp xếp tăng dần theo mã khách hàng
+void SXHD_TangDanTheoMKH(KH_List &ds)
+{
+	if (ds.head == NULL || ds.head->next == NULL)
+		return;
+	KH_Node*p;
+	KH_Node*nextNode;
+	int swapped;
+	do
+	{
+		swapped = 0;
+		p = ds.head;
+		while (p != NULL)
+		{
+			nextNode = p->next;
+			if (nextNode != NULL && p->data.maKH > nextNode->data.maKH)
+			{
+				Khachhang temp = p->data;
+				p->data = nextNode->data;
+				nextNode->data = temp;
+				KH_Node *tempNode = p->next;
+				p->next = nextNode->next;
+				nextNode->next = tempNode;
+				swapped = 1;
+			}
+			else
+			{
+				p = p->next;
+			}
+		}
+	} while (swapped);
+}
